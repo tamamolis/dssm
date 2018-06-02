@@ -46,7 +46,7 @@ def generate_vocab_small(stcA, stcB):
             if v not in vocab_set:
                 vocab_set.add(v)
     fw = open('../../model/vocab.txt', 'w')
-    print "vocab size: " + str(len(vocab_set))
+    print ("vocab size: " + str(len(vocab_set)))
     for v in vocab_set:
         fw.write(v + '\n')
     fw.close()
@@ -63,13 +63,13 @@ def generate_vocab():
     for line in fr.readlines():
         arr = line.rstrip().split(' ')
         if len(arr) != dim+1:
-            print index,arr
+            print (index,arr)
             break
         vocab[arr[0]] = index
         index += 1
         fw.write(arr[0] + '\n')
     assert size == len(vocab)
-    print "vocab size: " + str(size)
+    print ("vocab size: " + str(size))
     fr.close()
     fw.close()
 
