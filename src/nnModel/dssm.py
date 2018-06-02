@@ -1,12 +1,12 @@
 #coding=utf-8
 import os
 import sys
-
 import numpy as np
 import tensorflow as tf
+from importlib import reload
 
 reload(sys)
-sys.setdefaultencoding('utf8')
+# sys.setdefaultencoding('utf8')
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -174,7 +174,7 @@ class Model(object):
             ws.append(vals)
         fp.close()
         assert total == len(ws)
-        print "w2v size : " + str(total)
+        print ("w2v size : " + str(total))
         return np.asarray(ws, dtype=np.float32)
 
     def __conv2d(self, name, input, w, b):
