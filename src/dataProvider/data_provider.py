@@ -26,7 +26,7 @@ def load_dataset(query_path, doc_path, label_path):
     query_data = get_onehot_vec(query_path, sentence_length = 20)
     doc_data = get_onehot_vec(doc_path)
     label_data = get_label(label_path)
-    print query_data.shape, doc_data.shape, label_data.shape
+    print (query_data.shape, doc_data.shape, label_data.shape)
     assert query_data.shape == doc_data.shape
     assert query_data.shape[0] == label_data.shape[0]
     return query_data, doc_data, label_data
@@ -39,7 +39,7 @@ def get_onehot_vec(filepath, sentence_length=20):
         temp = []
         row = row.strip().split()
         if len(row) == 0:
-            print "sentence has no word"
+            print ("sentence has no word")
             continue
         for word in row:
             if word in vocab:
