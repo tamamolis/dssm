@@ -5,9 +5,10 @@ import tensorflow as tf
 sys.path.append("..")
 from dataProvider import data_provider
 import nnModel.dssm as dssm
+from importlib import reload
 
 reload(sys)
-sys.setdefaultencoding('utf8')
+# sys.setdefaultencoding('utf8')
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -64,8 +65,9 @@ def train():
 
         train_writer = tf.summary.FileWriter(FLAGS.summaries_dir + '/train', sess.graph)
         max_loss = float('INF')
-        epoch_steps = train_query.shape[0] / BS
+        epoch_steps = int(train_query.shape[0] / BS)
         previous_losses = []
+        print(epoch_steps)
         for epoch in range(FLAGS.max_epoch):
             for step in range(epoch_steps):
                 query_batch, doc_batch, label_batch = get_train_batch_data(step, BS)
@@ -90,9 +92,9 @@ def train():
 
             ls, acc, pred_, label_ = sess.run([dssmModel.loss, dssmModel.accuracy, dssmModel.pred_y, dssmModel.label_y], feed_dict={dssmModel.query: test_query, dssmModel.doc: test_doc, dssmModel.label: test_label})
             p_p, p_r, n_p, n_r = biclass_rate(label_, pred_)
-            print "--------------------------------------------"
+            print("--------------------------------------------")
             print('Test Epoch %d, loss: %f, accuracy: %f, p_precision: %f, p_recall: %f, n_precision: %f, n_recall: %f' % (epoch + 1, ls, acc, p_p, p_r, n_p, n_r))
-            print "--------------------------------------------"
+            print("--------------------------------------------")
             sys.stdout.flush()
 
 if __name__=='__main__':
