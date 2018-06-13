@@ -1,5 +1,7 @@
-#coding=utf-8
+# coding=utf-8
+from __future__ import print_function
 import random
+import gensim
 
 train_query_path = '../../dataset/train_query.txt'
 train_doc_path = '../../dataset/train_doc.txt'
@@ -11,10 +13,12 @@ test_query_path = '../../dataset/test_query.txt'
 test_doc_path = '../../dataset/test_doc.txt'
 test_label_path = '../../dataset/test_label.txt'
 
+
 def replaceTag(s):
     s = s.replace(',', '')
     s = s.replace('.', '')
     return s.lower()
+
 
 def getDataPairs(filepath):
     fr = open(filepath)
@@ -30,12 +34,13 @@ def getDataPairs(filepath):
         arr = line.strip().split('\t')
         if len(arr) != 12:
             continue
-        if float(arr[4]) < 3: #去掉关联低的文本对
+        if float(arr[4]) < 3:  # 去掉关联低的文本对
             continue
         stcA.append(replaceTag(arr[1]))
         stcB.append(replaceTag(arr[2]))
     assert len(stcA) == len(stcB)
     return stcA, stcB
+
 
 def generate_vocab_small(stcA, stcB):
     all_stc = stcA + stcB
@@ -46,32 +51,36 @@ def generate_vocab_small(stcA, stcB):
             if v not in vocab_set:
                 vocab_set.add(v)
     fw = open('../../model/vocab.txt', 'w')
-    print ("vocab size: " + str(len(vocab_set)))
+    print("vocab size: " + str(len(vocab_set)))
     for v in vocab_set:
         fw.write(v + '\n')
     fw.close()
+
 
 def generate_vocab():
     fr = open('../../model/vec.txt')
     vocab = {}
     first_line = fr.readline()
     f_arr = first_line.strip().split(' ')
+    # print('shape:', np.shape(f_arr), f_arr)
     size = int(f_arr[0])
     dim = int(f_arr[1])
     index = 0
     fw = open('../../model/vocab.txt', 'w')
     for line in fr.readlines():
         arr = line.rstrip().split(' ')
-        if len(arr) != dim+1:
-            print (index,arr)
+        if len(arr) != dim + 1:
+            print(index, arr)
             break
         vocab[arr[0]] = index
         index += 1
         fw.write(arr[0] + '\n')
+    print(size, len(vocab))
     assert size == len(vocab)
-    print ("vocab size: " + str(size))
+    print("vocab size: " + str(size))
     fr.close()
     fw.close()
+
 
 def generate_w2v(stcA, stcB):
     all_stc = stcA + stcB
@@ -80,7 +89,24 @@ def generate_w2v(stcA, stcB):
         fw.write(stc + '\n')
     fw.close()
 
-def generate_dataset(stcA, stcB, n_neg=10, former_rate=0.8, latter_rate = 0.9):
+
+def my_sentences(path):
+    fw = open(path, 'r')
+    sentences = []
+    for line in fw:
+        sentences.append(line.split(' '))
+    return sentences
+
+
+def generate_vec():
+    sentences = my_sentences('/Users/kate/PycharmProjects/dssm/raw_data/w2v_corpus.txt')
+    print(sentences)
+    model = gensim.models.Word2Vec(sentences, size=200)
+    model.wv.save_word2vec_format('../../model/vec.txt', binary=False)
+    print(model)
+
+
+def generate_dataset(stcA, stcB, n_neg=10, former_rate=0.8, latter_rate=0.9):
     query = stcA
     doc = stcB
 
@@ -95,17 +121,17 @@ def generate_dataset(stcA, stcB, n_neg=10, former_rate=0.8, latter_rate = 0.9):
     for i in range(l):
         query_data.append(query[i])
         doc_data.append(doc[i])
-        label.append([0,1])
+        label.append([0, 1])
         for _ in range(n_neg):
-            idx = random.randint(0, l-1)
+            idx = random.randint(0, l - 1)
             query_data.append(query[i])
             doc_data.append(doc[idx])
-            label.append([1,0])
+            label.append([1, 0])
 
     sample_number = len(query_data)
 
-    former = int(sample_number*former_rate)
-    latter = int(sample_number*latter_rate)
+    former = int(sample_number * former_rate)
+    latter = int(sample_number * latter_rate)
 
     train_query = query_data[:former]
     train_doc = doc_data[:former]
@@ -131,6 +157,7 @@ def generate_dataset(stcA, stcB, n_neg=10, former_rate=0.8, latter_rate = 0.9):
     write_file(test_doc, test_doc_path)
     write_file(test_label, test_label_path, True)
 
+
 def write_file(content, filepath, label=False):
     fw = open(filepath, 'w')
     if label:
@@ -141,12 +168,15 @@ def write_file(content, filepath, label=False):
             fw.write(row + '\n')
     fw.close()
 
-def main():
-    filepath = '../../raw_data/SICK.txt'
-    stcA, stcB = getDataPairs(filepath)
-    generate_w2v(stcA, stcB)
-    generate_vocab_small(stcA, stcB)
-    generate_dataset(stcA, stcB, n_neg=2)
 
-if __name__=='__main__':
+def main():
+    generate_vec()
+    # filepath = '../../raw_data/SICK.txt'
+    # stcA, stcB = getDataPairs(filepath)
+    # generate_w2v(stcA, stcB)
+    # generate_vocab_small(stcA, stcB)
+    # generate_dataset(stcA, stcB, n_neg=2)
+
+
+if __name__ == '__main__':
     main()
