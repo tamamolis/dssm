@@ -2,6 +2,7 @@
 from __future__ import print_function
 import random
 import gensim
+import numpy as np
 
 train_query_path = '../../dataset/train_query.txt'
 train_doc_path = '../../dataset/train_doc.txt'
@@ -93,17 +94,20 @@ def generate_w2v(stcA, stcB):
 def my_sentences(path):
     fw = open(path, 'r')
     sentences = []
+
     for line in fw:
-        sentences.append(line.split(' '))
+        word = line.split('\n')
+        sentences.append(word[0])
+    sentences = np.reshape(sentences, (len(sentences), 1))
     return sentences
 
 
 def generate_vec():
-    sentences = my_sentences('/Users/kate/PycharmProjects/dssm/raw_data/w2v_corpus.txt')
-    print(sentences)
-    model = gensim.models.Word2Vec(sentences, size=200)
+    sentences = my_sentences('../../model/vocab.txt')
+    print(sentences, np.shape(sentences))
+    # sentences = [['first', 'sentence'], ['second', 'sentence']]
+    model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
     model.wv.save_word2vec_format('../../model/vec.txt', binary=False)
-    print(model)
 
 
 def generate_dataset(stcA, stcB, n_neg=10, former_rate=0.8, latter_rate=0.9):
