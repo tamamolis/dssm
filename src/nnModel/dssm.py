@@ -4,10 +4,10 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
-# from importlib import reload
-from preprocess import preprocess
+import importlib
 
-# reload(sys)
+importlib.reload(sys)
+
 # sys.setdefaultencoding('utf8')
 
 flags = tf.app.flags
@@ -18,7 +18,7 @@ flags.DEFINE_integer('sentence_length', 20, 'sentence max word')
 flags.DEFINE_boolean('use_gpu', False, 'use gpu or not')
 flags.DEFINE_string('model_version', 'v1', 'model version')
 flags.DEFINE_boolean('fine_tune', True, 'enable word embedding fine tune')
-flags.DEFINE_integer('vocab_size', 1952, 'the size of the vocab') #было 2278
+flags.DEFINE_integer('vocab_size', 2278, 'the size of the vocab') #было 2278
 
 
 class Model(object):
@@ -180,7 +180,7 @@ class Model(object):
         for t in range(total):
             line = fp.readline().rstrip()
             ss = line.split(" ")[1:]
-            print('assert: ', t, len(ss), dim, total)
+            # print('assert: ', t, len(ss), dim, total)
             assert (len(ss) == dim)
             vals = []
             for i in range(0, dim):
@@ -188,7 +188,7 @@ class Model(object):
                 vals.append(fv)
             ws.append(vals)
         fp.close()
-        print('assert2: ', len(ws), total)
+        # print('assert2: ', len(ws), total)
         assert total == len(ws)
         print ("w2v size : " + str(total))
         return np.asarray(ws, dtype=np.float32)
