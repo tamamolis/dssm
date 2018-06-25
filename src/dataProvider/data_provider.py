@@ -63,6 +63,7 @@ def get_onehot_vec(filepath, sentence_length=20):
 def get_w2v(filepath, sentence_length=20):
     global vocab
     data_set = []
+    # zero_array = np.array()
 
     # w2v_path = "/Users/kate/PycharmProjects/dssm/dataset/GoogleNews-vectors-negative300.bin.gz"
     # model = gensim.models.KeyedVectors.load_word2vec_format(w2v_path , binary=False)
@@ -71,16 +72,22 @@ def get_w2v(filepath, sentence_length=20):
     model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
 
     fr = open(filepath)
-    k = 0
     for row in fr.readlines():
         temp = []
         row = row.strip().split()
         for word in row:
             if word in vocab:
                 temp.append(model[word])
-                k += 1
+        if len(temp) > sentence_length:
+            temp = temp[:sentence_length]
+        elif len(temp) < sentence_length:
+            # print('temp shape: ', np.shape(temp))
+            for i in range(sentence_length - np.shape(temp)[0]):
+                zero_array = np.zeros((1, 200))
+                temp = np.concatenate((temp, zero_array), axis=0)
+            # print('temp shape new: ', np.shape(temp))
+
         data_set.append(temp)
-    print(k)
     return np.asarray(data_set)
 
 
