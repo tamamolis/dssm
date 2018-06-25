@@ -29,10 +29,10 @@ def load_test_dataset():
 
 def load_dataset(query_path, doc_path, label_path):
     #    global train_query, train_doc, train_label, test_query, test_doc, test_label
-    query_data = get_onehot_vec(query_path, sentence_length=20)
-    doc_data = get_onehot_vec(doc_path)
+    query_data = get_w2v(query_path, sentence_length=20)
+    doc_data = get_w2v(doc_path)
     label_data = get_label(label_path)
-    print(query_data.shape, doc_data.shape, label_data.shape)
+    print(np.shape(query_data), np.shape(doc_data), np.shape(label_data))
     assert query_data.shape == doc_data.shape
     assert query_data.shape[0] == label_data.shape[0]
     return query_data, doc_data, label_data
@@ -62,6 +62,7 @@ def get_onehot_vec(filepath, sentence_length=20):
 
 def get_w2v(filepath, sentence_length=20):
     global vocab
+    data_set = []
 
     # w2v_path = "/Users/kate/PycharmProjects/dssm/dataset/GoogleNews-vectors-negative300.bin.gz"
     # model = gensim.models.KeyedVectors.load_word2vec_format(w2v_path , binary=False)
@@ -70,14 +71,17 @@ def get_w2v(filepath, sentence_length=20):
     model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
 
     fr = open(filepath)
+    k = 0
     for row in fr.readlines():
         temp = []
         row = row.strip().split()
         for word in row:
             if word in vocab:
                 temp.append(model[word])
-
-    return np.asarray(temp)
+                k += 1
+        data_set.append(temp)
+    print(k)
+    return np.asarray(data_set)
 
 
 def get_label(filepath):
