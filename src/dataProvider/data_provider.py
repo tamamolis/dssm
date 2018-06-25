@@ -60,16 +60,16 @@ def get_onehot_vec(filepath, sentence_length=20):
     return np.asarray(data_set, dtype=np.int32)
 
 
-def get_w2v(filepath_test, sentence_length=20):
+def get_w2v(filepath, sentence_length=20):
     global vocab
 
-    # filepath = "/Users/kate/PycharmProjects/dssm/dataset/GoogleNews-vectors-negative300.bin.gz"
-    # model = gensim.models.KeyedVectors.load_word2vec_format(filepath, binary=False)
+    # w2v_path = "/Users/kate/PycharmProjects/dssm/dataset/GoogleNews-vectors-negative300.bin.gz"
+    # model = gensim.models.KeyedVectors.load_word2vec_format(w2v_path , binary=False)
 
     sentences = gensim.models.word2vec.PathLineSentences('/Users/kate/PycharmProjects/dssm/raw_data/w2v_corpus.txt')
     model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
 
-    fr = open(filepath_test)
+    fr = open(filepath)
     for row in fr.readlines():
         temp = []
         row = row.strip().split()
