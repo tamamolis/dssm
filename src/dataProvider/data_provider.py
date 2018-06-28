@@ -1,6 +1,5 @@
 # coding=utf-8
 from __future__ import print_function
-import random
 import numpy as np
 import gensim
 
@@ -63,29 +62,32 @@ def get_onehot_vec(filepath, sentence_length=20):
 def get_w2v(filepath, sentence_length=20):
     global vocab
     data_set = []
-    # zero_array = np.array()
 
-    # w2v_path = "/Users/kate/PycharmProjects/dssm/dataset/GoogleNews-vectors-negative300.bin.gz"
-    # model = gensim.models.KeyedVectors.load_word2vec_format(w2v_path , binary=False)
+    w2v_path = "../../dataset/GoogleNews-vectors-negative300.bin.gz"
+    model = gensim.models.KeyedVectors.load_word2vec_format(w2v_path, binary=True)
 
-    sentences = gensim.models.word2vec.PathLineSentences('/Users/kate/PycharmProjects/dssm/raw_data/w2v_corpus.txt')
-    model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
+    # sentences = gensim.models.word2vec.PathLineSentences('/Users/kate/PycharmProjects/dssm/raw_data/w2v_corpus.txt')
+    # model = gensim.models.Word2Vec(sentences, min_count=1, size=300)
 
     fr = open(filepath)
     for row in fr.readlines():
         temp = []
         row = row.strip().split()
+
         for word in row:
             if word in vocab:
-                temp.append(model[word])
+                try:
+                    temp.append(model[word])
+                except KeyError:
+                    # print('word: ', word)
+                    w = np.zeros((300))
+                    temp.append(w)
         if len(temp) > sentence_length:
             temp = temp[:sentence_length]
         elif len(temp) < sentence_length:
-            # print('temp shape: ', np.shape(temp))
             for i in range(sentence_length - np.shape(temp)[0]):
-                zero_array = np.zeros((1, 200))
+                zero_array = np.zeros((1, 300))
                 temp = np.concatenate((temp, zero_array), axis=0)
-            # print('temp shape new: ', np.shape(temp))
 
         data_set.append(temp)
     return np.asarray(data_set)
