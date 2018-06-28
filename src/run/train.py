@@ -6,6 +6,7 @@ sys.path.append("..")
 from dataProvider import data_provider
 import nnModel.dssm as dssm
 import importlib
+import numpy as np
 
 importlib.reload(sys)
 
@@ -51,7 +52,16 @@ def get_train_batch_data(step, BS):
     global train_query, train_doc, train_label
     start = step * BS
     end = (step + 1) * BS
+    print(np.shape(train_query[start:end, :]), np.shape(train_query))  # (600, 20) (18105, 20)
     return train_query[start:end, :], train_doc[start:end, :], train_label[start:end, :]
+
+
+def get_train_batch_data_w2v(step, BS):
+    global train_query, train_doc, train_label
+    start = step * BS
+    end = (step + 1) * BS
+    print(np.shape(train_query))
+    return train_query[start:end, :], train_doc[start:end, :], train_label[start:end, ]
 
 
 def train():
@@ -74,7 +84,7 @@ def train():
         print(epoch_steps)
         for epoch in range(FLAGS.max_epoch):
             for step in range(epoch_steps):
-                query_batch, doc_batch, label_batch = get_train_batch_data(step, BS)
+                query_batch, doc_batch, label_batch = get_train_batch_data_w2v(step, BS)
                 sess.run(dssmModel.train_step, feed_dict={dssmModel.query: query_batch, dssmModel.doc: doc_batch,
                                                           dssmModel.label: label_batch})
                 mgd, ls, acc, pred_, label_, l_rate = sess.run(
