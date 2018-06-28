@@ -105,7 +105,7 @@ def my_sentences(path):
 def generate_vec():
     sentences = my_sentences('../../model/vocab.txt')
     print(sentences, np.shape(sentences))
-    model = gensim.models.Word2Vec(sentences, min_count=1, size=200)
+    model = gensim.models.Word2Vec(sentences, min_count=1, size=300)
     model.wv.save_word2vec_format('../../model/vec.txt', binary=False)
 
 
@@ -181,8 +181,8 @@ def write_file(content, filepath, label=False):
 
 
 def main():
-    # generate_vec()
-    generate_fasttext()
+    generate_vec()
+    # generate_fasttext()
     # filepath = '../../raw_data/SICK.txt'
     # stcA, stcB = getDataPairs(filepath)
     # generate_w2v(stcA, stcB)
