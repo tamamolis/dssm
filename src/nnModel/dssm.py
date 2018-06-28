@@ -13,7 +13,7 @@ importlib.reload(sys)
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('embedding_dim', 200, 'the dim of the fusion of multi word2vec model')
+flags.DEFINE_integer('embedding_dim', 300, 'the dim of the fusion of multi word2vec model')
 flags.DEFINE_integer('sentence_length', 20, 'sentence max word')
 flags.DEFINE_boolean('use_gpu', False, 'use gpu or not')
 flags.DEFINE_string('model_version', 'v1', 'model version')
@@ -44,23 +44,24 @@ class Model(object):
             device_name = "/cpu:0"
         with tf.device(device_name):
             with tf.name_scope('input'):
-                self.query = tf.placeholder(tf.int32, shape=[None, FLAGS.sentence_length], name='QueryData')
-                self.doc = tf.placeholder(tf.int32, shape=[None, FLAGS.sentence_length], name="DocData")
+                self.query = tf.placeholder(tf.float32, shape=[None, FLAGS.sentence_length, FLAGS.embedding_dim], name= 'QueryData')
+                self.doc = tf.placeholder(tf.float32, shape=[None, FLAGS.sentence_length, FLAGS.embedding_dim], name= "DocData")
                 self.label = tf.placeholder(tf.float32, shape=[None, 2], name='Label')
 
             with tf.name_scope('w2v'):
-                if FLAGS.fine_tune:
-                    self.words = tf.Variable(self.__load_w2v('../../model/vec.txt', FLAGS.embedding_dim),
-                                             dtype=tf.float32, name='words')
-                else:
-                    self.words = tf.Variable(tf.random_uniform([FLAGS.vocab_size, FLAGS.embedding_dim]),
-                                             dtype=tf.float32, name='words')
 
-                self.query_words = tf.nn.embedding_lookup(self.words, self.query)
-                self.doc_words = tf.nn.embedding_lookup(self.words, self.doc)
+                # if FLAGS.fine_tune:
+                #     self.words = tf.Variable(self.__load_w2v('../../model/vec.txt', FLAGS.embedding_dim),
+                #                              dtype=tf.float32, name='words')
+                # else:
+                #     self.words = tf.Variable(tf.random_uniform([FLAGS.vocab_size, FLAGS.embedding_dim]),
+                #                              dtype=tf.float32, name='words')
 
-                self.query_words_out = tf.expand_dims(self.query_words, -1)
-                self.doc_words_out = tf.expand_dims(self.doc_words, -1)
+                # self.query_words = tf.nn.embedding_lookup(self.words, self.query)
+                # self.doc_words = tf.nn.embedding_lookup(self.words, self.doc)
+
+                self.query_words_out = tf.expand_dims(self.query, -1)
+                self.doc_words_out = tf.expand_dims(self.doc, -1)
 
             with tf.name_scope('convolution_layer'):
                 self.wc = {}
@@ -73,6 +74,7 @@ class Model(object):
                 self.doc_pool_list = []
                 for i, size in enumerate(self.conv_kernel_size):
                     # conv kernel size = i
+                    print('FLAGS.embedding_dim: ', FLAGS.embedding_dim)
                     self.wc[size] = tf.Variable(
                         tf.random_normal([size, FLAGS.embedding_dim, 1, self.conv_kernel_number[i]]),
                         'wc' + str(size))
@@ -194,9 +196,11 @@ class Model(object):
         return np.asarray(ws, dtype=np.float32)
 
     def __conv2d(self, name, input, w, b):
+        print('conv2d: ', input)
         return tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, 1, 1, 1], padding='VALID'), b), name=name)
 
     def __full_max_pool(self, name, input, perm):
+
         conv1 = tf.transpose(input, perm=perm)
         values = tf.nn.top_k(conv1, 1, name=name).values
         conv2 = tf.transpose(values, perm=perm)
