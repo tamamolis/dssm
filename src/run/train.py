@@ -56,14 +56,6 @@ def get_train_batch_data(step, BS):
     return train_query[start:end, :], train_doc[start:end, :], train_label[start:end, :]
 
 
-def get_train_batch_data_w2v(step, BS):
-    global train_query, train_doc, train_label
-    start = step * BS
-    end = (step + 1) * BS
-    print(np.shape(train_query))
-    return train_query[start:end, :], train_doc[start:end, :], train_label[start:end, ]
-
-
 def train():
     BS = (2 + 1) * 200
 
@@ -84,7 +76,7 @@ def train():
         print(epoch_steps)
         for epoch in range(FLAGS.max_epoch):
             for step in range(epoch_steps):
-                query_batch, doc_batch, label_batch = get_train_batch_data_w2v(step, BS)
+                query_batch, doc_batch, label_batch = get_train_batch_data(step, BS)
                 sess.run(dssmModel.train_step, feed_dict={dssmModel.query: query_batch, dssmModel.doc: doc_batch,
                                                           dssmModel.label: label_batch})
                 mgd, ls, acc, pred_, label_, l_rate = sess.run(
